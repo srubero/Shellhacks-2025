@@ -1,0 +1,21 @@
+# PCB Defect Detection Dataset Configuration
+# Save this as: sample_data/dataset.yaml
+
+path: sample_data  # Root directory (relative to where you run the training script)
+train: images/train  # Path to training images (relative to 'path')
+val: images/val      # Path to validation images (relative to 'path')
+
+# Number of classes
+nc: 6
+
+# Class names (must match the order in your annotation files)
+names:
+  0: missing_hole
+  1: mouse_bite
+  2: open_circuit
+  3: short
+  4: spur
+  5: spurious_copper
+
+# Optional: Test set path
+# test: images/test

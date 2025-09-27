@@ -2,6 +2,7 @@ from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
+from contextlib import asynccontextmanager
 import uvicorn
 import cv2
 import numpy as np
@@ -9,32 +10,20 @@ import io
 from PIL import Image
 import base64
 from typing import List, Dict, Any
+import os
 
 # Import your custom model class
 from model import PCBDefectModel
 
-# Initialize FastAPI app
-app = FastAPI(title="PCB Defect Detector", version="1.0.0")
-
-# Add CORS middleware for frontend communication
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# Serve static files (frontend) - go up one directory to find frontend folder
-app.mount("/static", StaticFiles(directory="../frontend"), name="static")
-
 # Global model instance
 pcb_model = None
 
-@app.on_event("startup")
-async def load_model():
-    """Load model on startup"""
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Handle application startup and shutdown"""
     global pcb_model
+    
+    # Startup
     try:
         pcb_model = PCBDefectModel("best.pt")  # Try custom model first
         if not pcb_model.load_model():
@@ -45,6 +34,44 @@ async def load_model():
     except Exception as e:
         print(f"Error loading model: {e}")
         pcb_model = None
+    
+    yield
+    
+    # Shutdown (if needed)
+    print("Application shutting down...")
+
+# Initialize FastAPI app with lifespan
+app = FastAPI(
+    title="PCB Defect Detector", 
+    version="1.0.0",
+    lifespan=lifespan
+)
+
+# Add CORS middleware for frontend communication
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Debug: Print current working directory and check for static files
+print(f"Current working directory: {os.getcwd()}")
+static_paths = ["static", "../frontend", "frontend", "../static"]
+for path in static_paths:
+    if os.path.exists(path):
+        files = os.listdir(path)
+        print(f"Found directory '{path}' with files: {files}")
+        if "style.css" in files:
+            print(f"✓ Using static directory: {path}")
+            app.mount("/static", StaticFiles(directory=path), name="static")
+            break
+else:
+    print("❌ No valid static directory found with style.css")
+    print("Please ensure you have one of these directory structures:")
+    for path in static_paths:
+        print(f"  - {path}/style.css")
 
 def preprocess_image(image_bytes: bytes) -> np.ndarray:
     """Convert uploaded image bytes to OpenCV format"""
