@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛠️ PCB Defect Detector</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🛠️ PCB Defect Detector</h1>
+            <p>Upload a PCB image to detect manufacturing defects using AI</p>
+        </header>
+
+        <div class="upload-section">
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-content">
+                    <div class="upload-icon">📸</div>
+                    <p class="upload-text">Drag and drop a PCB image here</p>
+                    <p class="upload-subtext">or</p>
+                    <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                        Select Image
+                    </button>
+                    <input type="file" id="fileInput" accept="image/*" style="display: none;">
+                </div>
+            </div>
+
+            <div class="controls">
+                <label for="confidenceSlider">Confidence Threshold:</label>
+                <input type="range" id="confidenceSlider" min="0.1" max="0.9" step="0.1" value="0.3">
+                <span id="confidenceValue">0.3</span>
+            </div>
+        </div>
+
+        <div id="loading" class="loading" style="display: none;">
+            <div class="spinner"></div>
+            <p>🔍 Analyzing PCB for defects...</p>
+        </div>
+
+        <div id="results" class="results" style="display: none;">
+            <h2>Detection Results</h2>
+            
+            <div class="images-container">
+                <div class="image-section">
+                    <h3>Original Image</h3>
+                    <div class="image-wrapper">
+                        <img id="originalImage" alt="Original PCB">
+                    </div>
+                </div>
+                
+                <div class="image-section">
+                    <h3>Detected Defects</h3>
+                    <div class="image-wrapper">
+                        <img id="annotatedImage" alt="PCB with defects highlighted">
+                    </div>
+                </div>
+            </div>
+
+            <div class="detection-summary">
+                <h3 id="summaryTitle">Detection Summary</h3>
+                <div id="detectionStats"></div>
+                <div id="detectionList"></div>
+            </div>
+
+            <div class="model-info">
+                <h4>Model Information</h4>
+                <div id="modelInfo"></div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Built with FastAPI, YOLOv8, and ❤️ for hackathon</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
